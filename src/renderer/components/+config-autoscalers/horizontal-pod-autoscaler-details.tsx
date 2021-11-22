@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import "./hpa-details.scss";
+import "./horizontal-pod-autoscaler-details.scss";
 
 import React from "react";
 import { observer } from "mobx-react";
@@ -70,8 +70,7 @@ class NonInjectedHpaDetails extends React.Component<HpaDetailsProps & Dependenci
         }
         case HpaMetricType.Pods:
           return `${metric.pods.metricName} on Pods`;
-
-        case HpaMetricType.Object: {
+        case HpaMetricType.Object:
           return (
             <>
               {metric.object.metricName}
@@ -79,9 +78,10 @@ class NonInjectedHpaDetails extends React.Component<HpaDetailsProps & Dependenci
               {this.renderTargetLink(metric.object.target)}
             </>
           );
-        }
         case HpaMetricType.External:
           return `${metric.external.metricName} on ${JSON.stringify(metric.external.metricSelector)}`;
+        default:
+          return "Unknown metric type";
       }
     };
 

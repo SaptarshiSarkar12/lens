@@ -32,6 +32,8 @@ export class ApiManager {
 
   getApi(pathOrCallback: string | ((api: KubeApi<KubeObject>) => boolean)) {
     if (typeof pathOrCallback === "string") {
+      console.log(this.apis.keys(), parseKubeApi(pathOrCallback).apiBase);
+
       return this.apis.get(pathOrCallback) || this.apis.get(parseKubeApi(pathOrCallback).apiBase);
     }
 

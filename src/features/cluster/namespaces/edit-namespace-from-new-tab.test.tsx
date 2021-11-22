@@ -259,10 +259,16 @@ metadata:
                 expect(rendered.baseElement).toMatchSnapshot();
               });
 
-              it("calls for save with empty values", () => {
+              it("calls for save with just the adding version label", () => {
                 expect(callForPatchNamespaceMock).toHaveBeenCalledWith(
                   someNamespace,
-                  [],
+                  [{
+                    op: "add",
+                    path: "/metadata/labels",
+                    value: {
+                      "k8slens-edit-resource-version": "some-api-version",
+                    },
+                  }],
                 );
               });
 
@@ -568,6 +574,13 @@ metadata:
                         value: "some-new-value",
                       },
                       {
+                        op: "add",
+                        path: "/metadata/labels",
+                        value: {
+                          "k8slens-edit-resource-version": "some-api-version",
+                        },
+                      },
+                      {
                         op: "replace",
                         path: "/metadata/somePropertyToBeChanged",
                         value: "some-changed-value",
@@ -794,7 +807,7 @@ metadata:
 `);
                 });
 
-                it("when selecting to save, calls for save of second namespace", () => {
+                it("when selecting to save, calls for save of second namespace with just the add edit version label", () => {
                   callForPatchNamespaceMock.mockClear();
 
                   const saveButton = rendered.getByTestId(
@@ -805,7 +818,13 @@ metadata:
 
                   expect(callForPatchNamespaceMock).toHaveBeenCalledWith(
                     someOtherNamespace,
-                    [],
+                    [{
+                      op: "add",
+                      path: "/metadata/labels",
+                      value: {
+                        "k8slens-edit-resource-version": "some-api-version",
+                      },
+                    }],
                   );
                 });
 
@@ -861,7 +880,7 @@ metadata:
 `);
                   });
 
-                  it("when selecting to save, calls for save of first namespace", () => {
+                  it("when selecting to save, calls for save of first namespace with just the new edit version label", () => {
                     callForPatchNamespaceMock.mockClear();
 
                     const saveButton = rendered.getByTestId(
@@ -872,40 +891,17 @@ metadata:
 
                     expect(callForPatchNamespaceMock).toHaveBeenCalledWith(
                       someNamespace,
-                      [],
+                      [ {
+                        op: "add",
+                        path: "/metadata/labels",
+                        value: {
+                          "k8slens-edit-resource-version": "some-api-version",
+                        },
+                      }],
                     );
                   });
                 });
               });
-            });
-          });
-
-          describe("when call for namespace resolves without namespace", () => {
-            beforeEach(async () => {
-              await callForNamespaceMock.resolve({
-                callWasSuccessful: true,
-                response: undefined,
-              });
-            });
-
-            it("renders", () => {
-              expect(rendered.baseElement).toMatchSnapshot();
-            });
-
-            it("still shows the dock tab for editing namespace", () => {
-              expect(
-                rendered.getByTestId("dock-tab-for-some-first-tab-id"),
-              ).toBeInTheDocument();
-            });
-
-            it("shows error message", () => {
-              expect(
-                rendered.getByTestId("dock-tab-content-for-some-first-tab-id"),
-              ).toHaveTextContent("Resource not found");
-            });
-
-            it("does not show error notification", () => {
-              expect(showErrorNotificationMock).not.toHaveBeenCalled();
             });
           });
 

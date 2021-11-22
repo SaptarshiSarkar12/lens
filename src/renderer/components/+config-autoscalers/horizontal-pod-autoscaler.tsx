@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import "./hpa.scss";
+import "./horizontal-pod-autoscaler.scss";
 
 import React from "react";
 import { observer } from "mobx-react";
