@@ -6,18 +6,17 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { IComputedValue, IObservableValue } from "mobx";
 import { runInAction, action, observable, computed } from "mobx";
 import type { TargetHelmRelease } from "../target-helm-release.injectable";
-import type { CallForHelmRelease, DetailedHelmRelease } from "./call-for-helm-release/call-for-helm-release.injectable";
-import callForHelmReleaseInjectable from "./call-for-helm-release/call-for-helm-release.injectable";
+import type { RequestHelmRelease, DetailedHelmRelease } from "./request-helm-release.injectable";
+import requestHelmReleaseInjectable from "./request-helm-release.injectable";
 import type { LensTheme } from "../../../../themes/store";
-import type { CallForHelmReleaseConfiguration } from "./call-for-helm-release-configuration/call-for-helm-release-configuration.injectable";
-import callForHelmReleaseConfigurationInjectable from "./call-for-helm-release-configuration/call-for-helm-release-configuration.injectable";
-import { toHelmRelease } from "../../releases.injectable";
+import type { RequestHelmReleaseConfiguration } from "../../../../../common/k8s-api/endpoints/helm-releases.api/get-configuration.injectable";
+import requestHelmReleaseConfigurationInjectable from "../../../../../common/k8s-api/endpoints/helm-releases.api/get-configuration.injectable";
 import { pipeline } from "@ogre-tools/fp";
 import { groupBy, map } from "lodash/fp";
 import type { KubeJsonApiData } from "../../../../../common/k8s-api/kube-json-api";
 import type { GetResourceDetailsUrl } from "./get-resource-details-url.injectable";
 import getResourceDetailsUrlInjectable from "./get-resource-details-url.injectable";
-import type { CallForHelmReleaseUpdate } from "../../update-release/call-for-helm-release-update/call-for-helm-release-update.injectable";
+import type { RequestHelmReleaseUpdate } from "../../../../../common/k8s-api/endpoints/helm-releases.api/update.injectable";
 import updateReleaseInjectable from "../../update-release/update-release.injectable";
 import type { ShowCheckedErrorNotification } from "../../../notifications/show-checked-error.injectable";
 import showCheckedErrorNotificationInjectable from "../../../notifications/show-checked-error.injectable";
@@ -31,33 +30,27 @@ import navigateToHelmReleasesInjectable from "../../../../../common/front-end-ro
 import assert from "assert";
 import withOrphanPromiseInjectable from "../../../../../common/utils/with-orphan-promise/with-orphan-promise.injectable";
 import activeThemeInjectable from "../../../../themes/active.injectable";
+import type { ToHelmRelease } from "../../to-helm-release.injectable";
+import toHelmReleaseInjectable from "../../to-helm-release.injectable";
 
 const releaseDetailsModelInjectable = getInjectable({
   id: "release-details-model",
 
   instantiate: (di, targetRelease: TargetHelmRelease) => {
-    const callForHelmRelease = di.inject(callForHelmReleaseInjectable);
-    const callForHelmReleaseConfiguration = di.inject(callForHelmReleaseConfigurationInjectable);
-    const activeTheme = di.inject(activeThemeInjectable);
-    const getResourceDetailsUrl = di.inject(getResourceDetailsUrlInjectable);
-    const updateRelease = di.inject(updateReleaseInjectable);
-    const showCheckedErrorNotification = di.inject(showCheckedErrorNotificationInjectable);
-    const showSuccessNotification = di.inject(showSuccessNotificationInjectable);
-    const createUpgradeChartTab = di.inject(createUpgradeChartTabInjectable);
-    const navigateToHelmReleases = di.inject(navigateToHelmReleasesInjectable);
     const withOrphanPromise = di.inject(withOrphanPromiseInjectable);
 
     const model = new ReleaseDetailsModel({
-      callForHelmRelease,
+      requestHelmRelease: di.inject(requestHelmReleaseInjectable),
       targetRelease,
-      activeTheme,
-      callForHelmReleaseConfiguration,
-      getResourceDetailsUrl,
-      updateRelease,
-      showCheckedErrorNotification,
-      showSuccessNotification,
-      createUpgradeChartTab,
-      navigateToHelmReleases,
+      activeTheme: di.inject(activeThemeInjectable),
+      requestHelmReleaseConfiguration: di.inject(requestHelmReleaseConfigurationInjectable),
+      getResourceDetailsUrl: di.inject(getResourceDetailsUrlInjectable),
+      updateRelease: di.inject(updateReleaseInjectable),
+      showCheckedErrorNotification: di.inject(showCheckedErrorNotificationInjectable),
+      showSuccessNotification: di.inject(showSuccessNotificationInjectable),
+      createUpgradeChartTab: di.inject(createUpgradeChartTabInjectable),
+      navigateToHelmReleases: di.inject(navigateToHelmReleasesInjectable),
+      toHelmRelease: di.inject(toHelmReleaseInjectable),
     });
 
     const load = withOrphanPromise(model.load);
@@ -90,22 +83,23 @@ export interface ConfigurationInput {
 }
 
 interface Dependencies {
-  callForHelmRelease: CallForHelmRelease;
+  requestHelmRelease: RequestHelmRelease;
   targetRelease: TargetHelmRelease;
   activeTheme: IComputedValue<LensTheme>;
-  callForHelmReleaseConfiguration: CallForHelmReleaseConfiguration;
+  requestHelmReleaseConfiguration: RequestHelmReleaseConfiguration;
   getResourceDetailsUrl: GetResourceDetailsUrl;
-  updateRelease: CallForHelmReleaseUpdate;
+  updateRelease: RequestHelmReleaseUpdate;
   showCheckedErrorNotification: ShowCheckedErrorNotification;
   showSuccessNotification: ShowNotification;
   createUpgradeChartTab: (release: HelmRelease) => string;
   navigateToHelmReleases: NavigateToHelmReleases;
+  toHelmRelease: ToHelmRelease;
 }
 
 export class ReleaseDetailsModel {
   id = `${this.dependencies.targetRelease.namespace}/${this.dependencies.targetRelease.name}`;
 
-  constructor(private dependencies: Dependencies) {}
+  constructor(protected readonly dependencies: Dependencies) {}
 
   private detailedRelease = observable.box<DetailedHelmRelease | undefined>();
 
@@ -182,7 +176,7 @@ export class ReleaseDetailsModel {
 
     const { name, namespace } = this.dependencies.targetRelease;
 
-    const detailedRelease = await this.dependencies.callForHelmRelease(
+    const detailedRelease = await this.dependencies.requestHelmRelease(
       name,
       namespace,
     );
@@ -206,7 +200,7 @@ export class ReleaseDetailsModel {
     const { name, namespace } = this.release;
 
     const configuration =
-      await this.dependencies.callForHelmReleaseConfiguration(
+      await this.dependencies.requestHelmReleaseConfiguration(
         name,
         namespace,
         !this.onlyUserSuppliedValuesAreShown.value.get(),
@@ -223,7 +217,7 @@ export class ReleaseDetailsModel {
 
     assert(detailedRelease, "Tried to access release before load");
 
-    return toHelmRelease(detailedRelease.release);
+    return this.dependencies.toHelmRelease(detailedRelease.release);
   }
 
   @computed private get details() {
