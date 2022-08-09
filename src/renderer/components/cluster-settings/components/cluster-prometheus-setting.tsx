@@ -12,9 +12,10 @@ import { Select } from "../../select";
 import { Input } from "../../input";
 import { observable, computed, autorun, makeObservable } from "mobx";
 import { productName } from "../../../../common/vars";
-import type { MetricProviderInfo } from "../../../../common/k8s-api/endpoints/metrics.api";
-import { metricsApi } from "../../../../common/k8s-api/endpoints/metrics.api";
 import { Spinner } from "../../spinner";
+import type { MetricProviderInfo, RequestMetricsProviders } from "../../../../common/k8s-api/endpoints/metrics.api/get-providers.injectable";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import requestMetricsProvidersInjectable from "../../../../common/k8s-api/endpoints/metrics.api/get-providers.injectable";
 
 export interface ClusterPrometheusSettingProps {
   cluster: Cluster;
@@ -24,8 +25,12 @@ const autoDetectPrometheus = Symbol("auto-detect-prometheus");
 
 type ProviderValue = typeof autoDetectPrometheus | string;
 
+interface Dependencies {
+  requestMetricsProviders: RequestMetricsProviders;
+}
+
 @observer
-export class ClusterPrometheusSetting extends React.Component<ClusterPrometheusSettingProps> {
+class NonInjectedClusterPrometheusSetting extends React.Component<ClusterPrometheusSettingProps & Dependencies> {
   @observable path = "";
   @observable selectedOption: ProviderValue = autoDetectPrometheus;
   @observable loading = true;
@@ -46,7 +51,7 @@ export class ClusterPrometheusSetting extends React.Component<ClusterPrometheusS
     ];
   }
 
-  constructor(props: ClusterPrometheusSettingProps) {
+  constructor(props: ClusterPrometheusSettingProps & Dependencies) {
     super(props);
     makeObservable(this);
   }
@@ -80,8 +85,7 @@ export class ClusterPrometheusSetting extends React.Component<ClusterPrometheusS
       }),
     );
 
-    metricsApi
-      .getMetricProviders()
+    this.props.requestMetricsProviders()
       .then(values => {
         this.loading = false;
         this.loadedOptions.replace(values.map(provider => [provider.id, provider]));
@@ -164,3 +168,10 @@ export class ClusterPrometheusSetting extends React.Component<ClusterPrometheusS
     );
   }
 }
+
+export const ClusterPrometheusSetting = withInjectables<Dependencies, ClusterPrometheusSettingProps>(NonInjectedClusterPrometheusSetting, {
+  getProps: (di, props) => ({
+    ...props,
+    requestMetricsProviders: di.inject(requestMetricsProvidersInjectable),
+  }),
+});
