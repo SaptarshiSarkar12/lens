@@ -13,15 +13,15 @@ export interface DetailedHelmRelease {
   details: HelmReleaseDetails;
 }
 
-export type RequestHelmRelease = (
+export type RequestDetailedHelmRelease = (
   name: string,
   namespace: string
 ) => Promise<DetailedHelmRelease | undefined>;
 
-const requestHelmReleaseInjectable = getInjectable({
-  id: "call-for-helm-release",
+const requestDetailedHelmReleaseInjectable = getInjectable({
+  id: "request-detailed-helm-release",
 
-  instantiate: (di): RequestHelmRelease => {
+  instantiate: (di): RequestDetailedHelmRelease => {
     const requestHelmReleases = di.inject(requestHelmReleasesInjectable);
     const requestHelmReleaseDetails = di.inject(requestHelmReleaseDetailsInjectable);
 
@@ -44,4 +44,4 @@ const requestHelmReleaseInjectable = getInjectable({
   },
 });
 
-export default requestHelmReleaseInjectable;
+export default requestDetailedHelmReleaseInjectable;
