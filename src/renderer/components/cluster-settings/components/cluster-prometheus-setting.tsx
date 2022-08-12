@@ -13,9 +13,9 @@ import { Input } from "../../input";
 import { observable, computed, autorun, makeObservable } from "mobx";
 import { productName } from "../../../../common/vars";
 import { Spinner } from "../../spinner";
-import type { MetricProviderInfo, RequestMetricsProviders } from "../../../../common/k8s-api/endpoints/metrics.api/get-providers.injectable";
+import type { MetricProviderInfo, RequestMetricsProviders } from "../../../../common/k8s-api/endpoints/metrics.api/request-providers.injectable";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import requestMetricsProvidersInjectable from "../../../../common/k8s-api/endpoints/metrics.api/get-providers.injectable";
+import requestMetricsProvidersInjectable from "../../../../common/k8s-api/endpoints/metrics.api/request-providers.injectable";
 
 export interface ClusterPrometheusSettingProps {
   cluster: Cluster;
