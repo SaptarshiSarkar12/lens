@@ -6,8 +6,8 @@ import { getInjectable } from "@ogre-tools/injectable";
 import directoryForKubeConfigsInjectable from "../../../common/app-paths/directory-for-kube-configs/directory-for-kube-configs.injectable";
 import { KubeconfigSyncManager } from "./manager";
 import { createClusterInjectionToken } from "../../../common/cluster/create-cluster-injection-token";
-import clusterManagerInjectable from "../../cluster-manager.injectable";
 import catalogEntityRegistryInjectable from "../../catalog/entity-registry.injectable";
+import clustersThatAreBeingDeletedInjectable from "../../clusters-that-are-being-deleted.injectable";
 
 const kubeconfigSyncManagerInjectable = getInjectable({
   id: "kubeconfig-sync-manager",
@@ -15,8 +15,8 @@ const kubeconfigSyncManagerInjectable = getInjectable({
   instantiate: (di) => new KubeconfigSyncManager({
     directoryForKubeConfigs: di.inject(directoryForKubeConfigsInjectable),
     createCluster: di.inject(createClusterInjectionToken),
-    clusterManager: di.inject(clusterManagerInjectable),
     entityRegistry: di.inject(catalogEntityRegistryInjectable),
+    clustersThatAreBeingDeleted: di.inject(clustersThatAreBeingDeletedInjectable),
   }),
 });
 

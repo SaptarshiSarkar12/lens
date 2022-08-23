@@ -15,7 +15,6 @@ import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import { createClusterInjectionToken } from "../../../common/cluster/create-cluster-injection-token";
 import directoryForKubeConfigsInjectable from "../../../common/app-paths/directory-for-kube-configs/directory-for-kube-configs.injectable";
 import getConfigurationFileModelInjectable from "../../../common/get-configuration-file-model/get-configuration-file-model.injectable";
-import clusterManagerInjectable from "../../cluster-manager.injectable";
 import directoryForUserDataInjectable from "../../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
 import directoryForTempInjectable from "../../../common/app-paths/directory-for-temp/directory-for-temp.injectable";
 import kubectlBinaryNameInjectable from "../../kubectl/binary-name.injectable";
@@ -23,6 +22,7 @@ import kubectlDownloadingNormalizedArchInjectable from "../../kubectl/normalized
 import normalizedPlatformInjectable from "../../../common/vars/normalized-platform.injectable";
 import { iter } from "../../../common/utils";
 import fsInjectable from "../../../common/fs/fs.injectable";
+import clustersThatAreBeingDeletedInjectable from "../../clusters-that-are-being-deleted.injectable";
 
 jest.mock("electron", () => ({
   app: {
@@ -62,7 +62,7 @@ describe("kubeconfig-sync.source tests", () => {
     computeDiff = computeDiffFor({
       directoryForKubeConfigs: di.inject(directoryForKubeConfigsInjectable),
       createCluster: di.inject(createClusterInjectionToken),
-      clusterManager: di.inject(clusterManagerInjectable),
+      clustersThatAreBeingDeleted: di.inject(clustersThatAreBeingDeletedInjectable),
     });
   });
 
