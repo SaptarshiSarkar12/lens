@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { IComputedValue, ObservableMap } from "mobx";
+import type { IComputedValue, ObservableMap, ObservableSet } from "mobx";
 import { action, observable, computed, runInAction, makeObservable, observe } from "mobx";
 import type { CatalogEntity } from "../../../common/catalog";
 import type { FSWatcher } from "chokidar";
@@ -16,7 +16,6 @@ import { disposer, bytesToUnits, getOrInsertWith, iter, noop } from "../../../co
 import logger from "../../logger";
 import type { KubeConfig } from "@kubernetes/client-node";
 import { loadConfigFromString, splitConfig } from "../../../common/kube-helpers";
-import type { ClusterManager } from "../../cluster-manager";
 import { catalogEntityFromCluster } from "../../cluster-manager";
 import { UserStore } from "../../../common/user-store";
 import { ClusterStore } from "../../../common/cluster-store/cluster-store";
@@ -24,7 +23,7 @@ import { createHash } from "crypto";
 import { homedir } from "os";
 import globToRegExp from "glob-to-regexp";
 import { inspect } from "util";
-import type { ClusterConfigData, UpdateClusterModel } from "../../../common/cluster-types";
+import type { ClusterConfigData, ClusterId, UpdateClusterModel } from "../../../common/cluster-types";
 import type { Cluster } from "../../../common/cluster/cluster";
 import type { CatalogEntityRegistry } from "../../catalog/entity-registry";
 import type { CreateCluster } from "../../../common/cluster/create-cluster-injection-token";
@@ -55,7 +54,7 @@ const fileSyncMaxAllowedFileReadSize = 16 * folderSyncMaxAllowedFileReadSize; //
 interface KubeconfigSyncManagerDependencies {
   readonly directoryForKubeConfigs: string;
   readonly entityRegistry: CatalogEntityRegistry;
-  readonly clusterManager: ClusterManager;
+  readonly clustersThatAreBeingDeleted: ObservableSet<ClusterId>;
   createCluster: CreateCluster;
 }
 
@@ -175,11 +174,11 @@ type RootSource = ObservableMap<string, RootSourceValue>;
 interface ComputeDiffDependencies {
   directoryForKubeConfigs: string;
   createCluster: CreateCluster;
-  clusterManager: ClusterManager;
+  clustersThatAreBeingDeleted: ObservableSet<ClusterId>;
 }
 
 // exported for testing
-export const computeDiff = ({ directoryForKubeConfigs, createCluster, clusterManager }: ComputeDiffDependencies) => (contents: string, source: RootSource, filePath: string): void => {
+export const computeDiff = ({ directoryForKubeConfigs, createCluster, clustersThatAreBeingDeleted }: ComputeDiffDependencies) => (contents: string, source: RootSource, filePath: string): void => {
   runInAction(() => {
     try {
       const { config, error } = loadConfigFromString(contents);
@@ -199,7 +198,7 @@ export const computeDiff = ({ directoryForKubeConfigs, createCluster, clusterMan
         // remove and disconnect clusters that were removed from the config
         if (!data) {
           // remove from the deleting set, so that if a new context of the same name is added, it isn't marked as deleting
-          clusterManager.deleting.delete(value[0].id);
+          clustersThatAreBeingDeleted.delete(value[0].id);
 
           value[0].disconnect();
           source.delete(contextName);
