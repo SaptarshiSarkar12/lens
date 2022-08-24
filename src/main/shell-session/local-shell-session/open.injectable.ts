@@ -17,6 +17,7 @@ import type WebSocket from "ws";
 import getDirnameOfPathInjectable from "../../../common/path/get-dirname.injectable";
 import joinPathsInjectable from "../../../common/path/join-paths.injectable";
 import getBasenameOfPathInjectable from "../../../common/path/get-basename.injectable";
+import emitAppEventInjectable from "../../../common/app-event-bus/emit-event.injectable";
 
 export interface OpenLocalShellSessionArgs {
   websocket: WebSocket;
@@ -38,6 +39,7 @@ const openLocalShellSessionInjectable = getInjectable({
       isWindows: di.inject(isWindowsInjectable),
       logger: di.inject(loggerInjectable),
       userStore: di.inject(userStoreInjectable),
+      emitAppEvent: di.inject(emitAppEventInjectable),
       getDirnameOfPath: di.inject(getDirnameOfPathInjectable),
       joinPaths: di.inject(joinPathsInjectable),
       getBasenameOfPath: di.inject(getBasenameOfPathInjectable),

@@ -12,6 +12,7 @@ import isMacInjectable from "../../../common/vars/is-mac.injectable";
 import isWindowsInjectable from "../../../common/vars/is-windows.injectable";
 import loggerInjectable from "../../../common/logger.injectable";
 import createKubeJsonApiForClusterInjectable from "../../../common/k8s-api/create-kube-json-api-for-cluster.injectable";
+import emitAppEventInjectable from "../../../common/app-event-bus/emit-event.injectable";
 
 export interface NodeShellSessionArgs {
   websocket: WebSocket;
@@ -29,6 +30,7 @@ const openNodeShellSessionInjectable = getInjectable({
       isWindows: di.inject(isWindowsInjectable),
       logger: di.inject(loggerInjectable),
       createKubeJsonApiForCluster: di.inject(createKubeJsonApiForClusterInjectable),
+      emitAppEvent: di.inject(emitAppEventInjectable),
     };
     const kubectl = createKubectl(params.cluster.version);
     const session = new NodeShellSession(dependencies, { kubectl, ...params });

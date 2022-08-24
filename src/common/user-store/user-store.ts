@@ -9,13 +9,13 @@ import { action, computed, observable, reaction, makeObservable, isObservableArr
 import { BaseStore } from "../base-store";
 import migrations from "../../migrations/user-store";
 import { getAppVersion } from "../utils/app-version";
-import { appEventBus } from "../app-event-bus/event-bus";
 import { getOrInsertSet, toggle, toJS, object } from "../../renderer/utils";
 import { DESCRIPTORS } from "./preferences-helpers";
 import type { UserPreferencesModel, StoreType } from "./preferences-helpers";
 import logger from "../../main/logger";
 import type { SelectedUpdateChannel } from "../application-update/selected-update-channel/selected-update-channel.injectable";
 import type { UpdateChannelId } from "../application-update/update-channels";
+import type { EmitAppEvent } from "../app-event-bus/emit-event.injectable";
 
 export interface UserStoreModel {
   lastSeenAppVersion: string;
@@ -24,6 +24,7 @@ export interface UserStoreModel {
 
 interface Dependencies {
   readonly selectedUpdateChannel: SelectedUpdateChannel;
+  emitAppEvent: EmitAppEvent;
 }
 
 export class UserStore extends BaseStore<UserStoreModel> /* implements UserStoreFlatModel (when strict null is enabled) */ {
@@ -146,7 +147,7 @@ export class UserStore extends BaseStore<UserStoreModel> /* implements UserStore
 
   @action
   saveLastSeenAppVersion() {
-    appEventBus.emit({ name: "app", action: "whats-new-seen" });
+    this.dependencies.emitAppEvent({ name: "app", action: "whats-new-seen" });
     this.lastSeenAppVersion = getAppVersion();
   }
 

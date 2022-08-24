@@ -8,12 +8,10 @@ import { clusterFrameMap } from "../../../../common/cluster-frames";
 import { clusterActivateHandler, clusterSetFrameIdHandler, clusterVisibilityHandler, clusterRefreshHandler, clusterDisconnectHandler, clusterKubectlApplyAllHandler, clusterKubectlDeleteAllHandler } from "../../../../common/ipc/cluster";
 import type { ClusterId } from "../../../../common/cluster-types";
 import { ClusterStore } from "../../../../common/cluster-store/cluster-store";
-import { appEventBus } from "../../../../common/app-event-bus/event-bus";
 import { broadcastMainChannel, broadcastMessage, ipcMainHandle, ipcMainOn } from "../../../../common/ipc";
 import type { CatalogEntityRegistry } from "../../../catalog";
 import { pushCatalogToRenderer } from "../../../catalog-pusher";
 import type { ClusterManager } from "../../../cluster-manager";
-import { ResourceApplier } from "../../../resource-applier";
 import type { IComputedValue } from "mobx";
 import type { MenuItemOpts } from "../../../menu/application-menu-items.injectable";
 import { windowActionHandleChannel, windowLocationChangedChannel, windowOpenAppMenuAsContextMenuChannel } from "../../../../common/ipc/window";
@@ -22,6 +20,8 @@ import { openFilePickingDialogChannel } from "../../../../common/ipc/dialog";
 import { getNativeThemeChannel } from "../../../../common/ipc/native-theme";
 import type { Theme } from "../../../theme/operating-system-theme-state.injectable";
 import type { AskUserForFilePaths } from "../../../ipc/ask-user-for-file-paths.injectable";
+import type { EmitAppEvent } from "../../../../common/app-event-bus/emit-event.injectable";
+import type { CreateResourceApplier } from "../../../resource-applier/create-resource-applier.injectable";
 
 interface Dependencies {
   applicationMenuItems: IComputedValue<MenuItemOpts[]>;
@@ -30,9 +30,20 @@ interface Dependencies {
   clusterStore: ClusterStore;
   operatingSystemTheme: IComputedValue<Theme>;
   askUserForFilePaths: AskUserForFilePaths;
+  emitAppEvent: EmitAppEvent;
+  createResourceApplier: CreateResourceApplier;
 }
 
-export const setupIpcMainHandlers = ({ applicationMenuItems, clusterManager, catalogEntityRegistry, clusterStore, operatingSystemTheme, askUserForFilePaths }: Dependencies) => {
+export const setupIpcMainHandlers = ({
+  applicationMenuItems,
+  clusterManager,
+  catalogEntityRegistry,
+  clusterStore,
+  operatingSystemTheme,
+  askUserForFilePaths,
+  emitAppEvent,
+  createResourceApplier,
+}: Dependencies) => {
   ipcMainHandle(clusterActivateHandler, (event, clusterId: ClusterId, force = false) => {
     return ClusterStore.getInstance()
       .getById(clusterId)
@@ -61,7 +72,7 @@ export const setupIpcMainHandlers = ({ applicationMenuItems, clusterManager, cat
   });
 
   ipcMainHandle(clusterDisconnectHandler, (event, clusterId: ClusterId) => {
-    appEventBus.emit({ name: "cluster", action: "stop" });
+    emitAppEvent({ name: "cluster", action: "stop" });
     const cluster = ClusterStore.getInstance().getById(clusterId);
 
     if (cluster) {
@@ -71,11 +82,11 @@ export const setupIpcMainHandlers = ({ applicationMenuItems, clusterManager, cat
   });
 
   ipcMainHandle(clusterKubectlApplyAllHandler, async (event, clusterId: ClusterId, resources: string[], extraArgs: string[]) => {
-    appEventBus.emit({ name: "cluster", action: "kubectl-apply-all" });
+    emitAppEvent({ name: "cluster", action: "kubectl-apply-all" });
     const cluster = ClusterStore.getInstance().getById(clusterId);
 
     if (cluster) {
-      const applier = new ResourceApplier(cluster);
+      const applier = createResourceApplier(cluster);
 
       try {
         const stdout = await applier.kubectlApplyAll(resources, extraArgs);
@@ -90,11 +101,11 @@ export const setupIpcMainHandlers = ({ applicationMenuItems, clusterManager, cat
   });
 
   ipcMainHandle(clusterKubectlDeleteAllHandler, async (event, clusterId: ClusterId, resources: string[], extraArgs: string[]) => {
-    appEventBus.emit({ name: "cluster", action: "kubectl-delete-all" });
+    emitAppEvent({ name: "cluster", action: "kubectl-delete-all" });
     const cluster = ClusterStore.getInstance().getById(clusterId);
 
     if (cluster) {
-      const applier = new ResourceApplier(cluster);
+      const applier = createResourceApplier(cluster);
 
       try {
         const stdout = await applier.kubectlDeleteAll(resources, extraArgs);
