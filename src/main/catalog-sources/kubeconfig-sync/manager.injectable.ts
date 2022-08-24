@@ -8,6 +8,8 @@ import { KubeconfigSyncManager } from "./manager";
 import { createClusterInjectionToken } from "../../../common/cluster/create-cluster-injection-token";
 import catalogEntityRegistryInjectable from "../../catalog/entity-registry.injectable";
 import clustersThatAreBeingDeletedInjectable from "../../clusters-that-are-being-deleted.injectable";
+import getClusterByIdInjectable from "../../../common/cluster-store/get-by-id.injectable";
+import loggerInjectable from "../../../common/logger.injectable";
 
 const kubeconfigSyncManagerInjectable = getInjectable({
   id: "kubeconfig-sync-manager",
@@ -17,6 +19,8 @@ const kubeconfigSyncManagerInjectable = getInjectable({
     createCluster: di.inject(createClusterInjectionToken),
     entityRegistry: di.inject(catalogEntityRegistryInjectable),
     clustersThatAreBeingDeleted: di.inject(clustersThatAreBeingDeletedInjectable),
+    getClusterById: di.inject(getClusterByIdInjectable),
+    logger: di.inject(loggerInjectable),
   }),
 });
 
