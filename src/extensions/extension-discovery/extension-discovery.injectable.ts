@@ -17,38 +17,39 @@ import readJsonFileInjectable from "../../common/fs/read-json-file.injectable";
 import loggerInjectable from "../../common/logger.injectable";
 import pathExistsInjectable from "../../common/fs/path-exists.injectable";
 import watchInjectable from "../../common/fs/watch/watch.injectable";
+import accessPathInjectable from "../../common/fs/access-path.injectable";
+import copyInjectable from "../../common/fs/copy.injectable";
+import deleteFileInjectable from "../../common/fs/delete-file.injectable";
+import ensureDirInjectable from "../../common/fs/ensure-dir.injectable";
+import isProductionInjectable from "../../common/vars/is-production.injectable";
+import lstatInjectable from "../../common/fs/lstat.injectable";
+import readDirInjectable from "../../common/fs/read-dir.injectable";
 
 const extensionDiscoveryInjectable = getInjectable({
   id: "extension-discovery",
 
-  instantiate: (di) =>
-    new ExtensionDiscovery({
-      extensionLoader: di.inject(extensionLoaderInjectable),
-      extensionsStore: di.inject(extensionsStoreInjectable),
-
-      extensionInstallationStateStore: di.inject(
-        extensionInstallationStateStoreInjectable,
-      ),
-
-      isCompatibleBundledExtension: di.inject(
-        isCompatibleBundledExtensionInjectable,
-      ),
-
-      isCompatibleExtension: di.inject(isCompatibleExtensionInjectable),
-
-      installExtension: di.inject(installExtensionInjectable),
-      installExtensions: di.inject(installExtensionsInjectable),
-
-      extensionPackageRootDirectory: di.inject(
-        extensionPackageRootDirectoryInjectable,
-      ),
-
-      staticFilesDirectory: di.inject(staticFilesDirectoryInjectable),
-      readJsonFile: di.inject(readJsonFileInjectable),
-      pathExists: di.inject(pathExistsInjectable),
-      watch: di.inject(watchInjectable),
-      logger: di.inject(loggerInjectable),
-    }),
+  instantiate: (di) => new ExtensionDiscovery({
+    extensionLoader: di.inject(extensionLoaderInjectable),
+    extensionsStore: di.inject(extensionsStoreInjectable),
+    extensionInstallationStateStore: di.inject(extensionInstallationStateStoreInjectable),
+    isCompatibleBundledExtension: di.inject(isCompatibleBundledExtensionInjectable),
+    isCompatibleExtension: di.inject(isCompatibleExtensionInjectable),
+    installExtension: di.inject(installExtensionInjectable),
+    installExtensions: di.inject(installExtensionsInjectable),
+    extensionPackageRootDirectory: di.inject(extensionPackageRootDirectoryInjectable),
+    staticFilesDirectory: di.inject(staticFilesDirectoryInjectable),
+    readJsonFile: di.inject(readJsonFileInjectable),
+    pathExists: di.inject(pathExistsInjectable),
+    watch: di.inject(watchInjectable),
+    logger: di.inject(loggerInjectable),
+    accessPath: di.inject(accessPathInjectable),
+    copy: di.inject(copyInjectable),
+    deleteFile: di.inject(deleteFileInjectable),
+    ensureDirectory: di.inject(ensureDirInjectable),
+    isProduction: di.inject(isProductionInjectable),
+    lstat: di.inject(lstatInjectable),
+    readDirectory: di.inject(readDirInjectable),
+  }),
 });
 
 export default extensionDiscoveryInjectable;
