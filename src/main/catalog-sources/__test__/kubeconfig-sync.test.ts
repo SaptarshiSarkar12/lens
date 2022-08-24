@@ -7,7 +7,7 @@ import { ObservableMap } from "mobx";
 import type { CatalogEntity } from "../../../common/catalog";
 import { loadFromOptions } from "../../../common/kube-helpers";
 import type { Cluster } from "../../../common/cluster/cluster";
-import { computeDiff as computeDiffFor, configToModels } from "../kubeconfig-sync/manager";
+import { computeDiffWith, configToModelsWith } from "../kubeconfig-sync/manager";
 import mockFs from "mock-fs";
 import fs from "fs";
 import clusterStoreInjectable from "../../../common/cluster-store/cluster-store.injectable";
@@ -23,6 +23,7 @@ import normalizedPlatformInjectable from "../../../common/vars/normalized-platfo
 import { iter } from "../../../common/utils";
 import fsInjectable from "../../../common/fs/fs.injectable";
 import clustersThatAreBeingDeletedInjectable from "../../clusters-that-are-being-deleted.injectable";
+import loggerInjectable from "../../../common/logger.injectable";
 
 jest.mock("electron", () => ({
   app: {
@@ -41,7 +42,8 @@ jest.mock("electron", () => ({
 }));
 
 describe("kubeconfig-sync.source tests", () => {
-  let computeDiff: ReturnType<typeof computeDiffFor>;
+  let computeDiff: ReturnType<typeof computeDiffWith>;
+  let configToModels: ReturnType<typeof configToModelsWith>;
 
   beforeEach(async () => {
     const di = getDiForUnitTesting({ doGeneralOverrides: true });
@@ -59,10 +61,15 @@ describe("kubeconfig-sync.source tests", () => {
     di.permitSideEffects(clusterStoreInjectable);
     di.permitSideEffects(getConfigurationFileModelInjectable);
 
-    computeDiff = computeDiffFor({
+    computeDiff = computeDiffWith({
       directoryForKubeConfigs: di.inject(directoryForKubeConfigsInjectable),
       createCluster: di.inject(createClusterInjectionToken),
       clustersThatAreBeingDeleted: di.inject(clustersThatAreBeingDeletedInjectable),
+      getClusterById: () => undefined,
+      logger: di.inject(loggerInjectable),
+    });
+    configToModels = configToModelsWith({
+      logger: di.inject(loggerInjectable),
     });
   });
 
