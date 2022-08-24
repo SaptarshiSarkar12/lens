@@ -24,6 +24,11 @@ import ensureDirInjectable from "../../common/fs/ensure-dir.injectable";
 import isProductionInjectable from "../../common/vars/is-production.injectable";
 import lstatInjectable from "../../common/fs/lstat.injectable";
 import readDirInjectable from "../../common/fs/read-dir.injectable";
+import fileSystemSeparatorInjectable from "../../common/path/separator.injectable";
+import getBasenameOfPathInjectable from "../../common/path/get-basename.injectable";
+import getDirnameOfPathInjectable from "../../common/path/get-dirname.injectable";
+import getRelativePathInjectable from "../../common/path/get-relative-path.injectable";
+import joinPathsInjectable from "../../common/path/join-paths.injectable";
 
 const extensionDiscoveryInjectable = getInjectable({
   id: "extension-discovery",
@@ -49,6 +54,11 @@ const extensionDiscoveryInjectable = getInjectable({
     isProduction: di.inject(isProductionInjectable),
     lstat: di.inject(lstatInjectable),
     readDirectory: di.inject(readDirInjectable),
+    fileSystemSeparator: di.inject(fileSystemSeparatorInjectable),
+    getBasenameOfPath: di.inject(getBasenameOfPathInjectable),
+    getDirnameOfPath: di.inject(getDirnameOfPathInjectable),
+    getRelativePath: di.inject(getRelativePathInjectable),
+    joinPaths: di.inject(joinPathsInjectable),
   }),
 });
 
