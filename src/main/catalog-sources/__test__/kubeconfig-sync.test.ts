@@ -24,6 +24,7 @@ import { iter } from "../../../common/utils";
 import fsInjectable from "../../../common/fs/fs.injectable";
 import clustersThatAreBeingDeletedInjectable from "../../clusters-that-are-being-deleted.injectable";
 import loggerInjectable from "../../../common/logger.injectable";
+import getBasenameOfPathInjectable from "../../../common/path/get-basename.injectable";
 
 jest.mock("electron", () => ({
   app: {
@@ -67,6 +68,7 @@ describe("kubeconfig-sync.source tests", () => {
       clustersThatAreBeingDeleted: di.inject(clustersThatAreBeingDeletedInjectable),
       getClusterById: () => undefined,
       logger: di.inject(loggerInjectable),
+      getBasenameOfPath: di.inject(getBasenameOfPathInjectable),
     });
     configToModels = configToModelsWith({
       logger: di.inject(loggerInjectable),

@@ -10,6 +10,7 @@ import catalogEntityRegistryInjectable from "../../catalog/entity-registry.injec
 import clustersThatAreBeingDeletedInjectable from "../../clusters-that-are-being-deleted.injectable";
 import getClusterByIdInjectable from "../../../common/cluster-store/get-by-id.injectable";
 import loggerInjectable from "../../../common/logger.injectable";
+import getBasenameOfPathInjectable from "../../../common/path/get-basename.injectable";
 
 const kubeconfigSyncManagerInjectable = getInjectable({
   id: "kubeconfig-sync-manager",
@@ -21,6 +22,7 @@ const kubeconfigSyncManagerInjectable = getInjectable({
     clustersThatAreBeingDeleted: di.inject(clustersThatAreBeingDeletedInjectable),
     getClusterById: di.inject(getClusterByIdInjectable),
     logger: di.inject(loggerInjectable),
+    getBasenameOfPath: di.inject(getBasenameOfPathInjectable),
   }),
 });
 
