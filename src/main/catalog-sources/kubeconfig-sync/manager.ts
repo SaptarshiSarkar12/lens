@@ -10,7 +10,6 @@ import type { FSWatcher } from "chokidar";
 import { watch } from "chokidar";
 import type { Stats } from "fs";
 import fs from "fs";
-import path from "path";
 import type { Disposer } from "../../../common/utils";
 import { disposer, bytesToUnits, getOrInsertWith, iter, noop } from "../../../common/utils";
 import type { KubeConfig } from "@kubernetes/client-node";
@@ -27,6 +26,7 @@ import type { CatalogEntityRegistry } from "../../catalog/entity-registry";
 import type { CreateCluster } from "../../../common/cluster/create-cluster-injection-token";
 import type { Logger } from "../../../common/logger";
 import type { GetClusterById } from "../../../common/cluster-store/get-by-id.injectable";
+import type { GetBasenameOfPath } from "../../../common/path/get-basename.injectable";
 
 const logPrefix = "[KUBECONFIG-SYNC]:";
 
@@ -58,6 +58,7 @@ interface KubeconfigSyncManagerDependencies {
   readonly logger: Logger;
   createCluster: CreateCluster;
   getClusterById: GetClusterById;
+  getBasenameOfPath: GetBasenameOfPath;
 }
 
 const kubeConfigSyncName = "lens:kube-sync";
@@ -179,6 +180,7 @@ interface ComputeDiffDependencies {
   clustersThatAreBeingDeleted: ObservableSet<ClusterId>;
   logger: Logger;
   getClusterById: GetClusterById;
+  getBasenameOfPath: GetBasenameOfPath;
 }
 
 // exported for testing
@@ -311,7 +313,7 @@ const diffChangedConfigFor = (dependencies: ComputeDiffDependencies) => {
 };
 
 const watchFileChangesWith = (dependencies: ComputeDiffDependencies) => {
-  const { logger } = dependencies;
+  const { logger, getBasenameOfPath } = dependencies;
   const diffChangedConfig = diffChangedConfigFor(dependencies);
 
   return (filePath: string): [IComputedValue<CatalogEntity[]>, Disposer] => {
@@ -363,7 +365,7 @@ const watchFileChangesWith = (dependencies: ComputeDiffDependencies) => {
           })
           .on("add", (childFilePath, stats: Stats): void => {
             if (isFolderSync) {
-              const fileName = path.basename(childFilePath);
+              const fileName = getBasenameOfPath(childFilePath);
 
               for (const ignoreGlob of ignoreGlobs) {
                 if (ignoreGlob.matcher.test(fileName)) {

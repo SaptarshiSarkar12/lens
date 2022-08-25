@@ -9,7 +9,6 @@ import { action, computed, observable, reaction, makeObservable, isObservableArr
 import { BaseStore } from "../base-store";
 import migrations from "../../migrations/user-store";
 import { getAppVersion } from "../utils/app-version";
-import { kubeConfigDefaultPath } from "../kube-helpers";
 import { appEventBus } from "../app-event-bus/event-bus";
 import { getOrInsertSet, toggle, toJS, object } from "../../renderer/utils";
 import { DESCRIPTORS } from "./preferences-helpers";
@@ -24,7 +23,7 @@ export interface UserStoreModel {
 }
 
 interface Dependencies {
-  selectedUpdateChannel: SelectedUpdateChannel;
+  readonly selectedUpdateChannel: SelectedUpdateChannel;
 }
 
 export class UserStore extends BaseStore<UserStoreModel> /* implements UserStoreFlatModel (when strict null is enabled) */ {
@@ -41,12 +40,6 @@ export class UserStore extends BaseStore<UserStoreModel> /* implements UserStore
   }
 
   @observable lastSeenAppVersion = "0.0.0";
-
-  /**
-   * used in add-cluster page for providing context
-   * @deprecated No longer used
-   */
-  @observable kubeConfigPath = kubeConfigDefaultPath;
 
   /**
    * @deprecated No longer used
