@@ -430,6 +430,7 @@ exports[`download logs options in pod logs dock tab when opening pod logs render
                       >
                         <i
                           class="Icon material interactive focusable small"
+                          data-testid="dock-tab-close-for-log-tab-some-irrelevant-random-id"
                           tabindex="0"
                         >
                           <span
@@ -439,7 +440,9 @@ exports[`download logs options in pod logs dock tab when opening pod logs render
                             close
                           </span>
                         </i>
-                        <div>
+                        <div
+                          data-testid="tooltip-content-for-dock-tab-close-for-log-tab-some-irrelevant-random-id"
+                        >
                           Close ⌘+W
                         </div>
                       </div>
