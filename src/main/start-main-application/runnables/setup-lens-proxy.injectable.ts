@@ -24,6 +24,7 @@ const setupLensProxyInjectable = getInjectable({
     const showErrorPopup = di.inject(showErrorPopupInjectable);
 
     return {
+      id: "setup-lens-proxy",
       run: async () => {
         try {
           logger.info("🔌 Starting LensProxy");

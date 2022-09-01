@@ -11,6 +11,7 @@ const setupSentryInjectable = getInjectable({
   id: "setup-sentry",
 
   instantiate: () => ({
+    id: "setup-sentry",
     run: () => {
       initializeSentryReporting(init);
     },

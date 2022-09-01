@@ -14,6 +14,7 @@ const setupShellInjectable = getInjectable({
     const logger = di.inject(loggerInjectable);
 
     return {
+      id: "setup-shell",
       run: async () => {
         logger.info("🐚 Syncing shell environment");
 
