@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable } from "@ogre-tools/injectable";
-import appSemanticVersionInjectable from "../../vars/app-semantic-version.injectable";
+import buildSemanticVersionInjectable from "../../vars/build-semantic-version.injectable";
 import type { UpdateChannelId } from "../update-channels";
 import { updateChannels } from "../update-channels";
 
@@ -11,7 +11,7 @@ const defaultUpdateChannelInjectable = getInjectable({
   id: "default-update-channel",
 
   instantiate: (di) => {
-    const appSemanticVersion = di.inject(appSemanticVersionInjectable);
+    const appSemanticVersion = di.inject(buildSemanticVersionInjectable);
     const currentReleaseChannel = appSemanticVersion.prerelease[0]?.toString();
 
     if (currentReleaseChannel in updateChannels) {
